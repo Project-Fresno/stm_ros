@@ -21,7 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'odom_publisher = stm_ros.odom_pub:main',
-            'cmd_vel_sub = subsribe_cmd_send_serial:main'
+            'cmd_vel_sub = stm_ros.subscribe_cmd_send_serial:main',
         ],
     },
 )

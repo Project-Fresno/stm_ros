@@ -24,7 +24,7 @@ import time
 class MinimalSubscriber(Node):
 
     def __init__(self):
-        super().__init__('minimal_subscriber')
+        super().__init__('cmd_vel_sub')
 
         self.ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
         time.sleep(2)
@@ -38,11 +38,17 @@ class MinimalSubscriber(Node):
 
     def listener_callback(self, msg):
         # self.get_logger().info('I heard: "%s"' % msg.data)
-        send_word = [0,0]
-        send_word[1] = msg.linear.x
-        send_word[2] = msg.angular.z
-
-        self.ser.write(send_word.encode('utf-8'))
+        # send_word = ["0","0"]
+        msg.linear.x = 100*msg.linear.x
+        msg.angular.z = 100*msg.angular.z
+        x = int(msg.linear.x)
+        z = int(msg.angular.z)
+        # send_word[0] = str(x)
+        # send_word[1] = str(z)
+        # self.get_logger().info("%s" % str(send_word))
+        st = str(x)+','+str(z)+'\n'
+        print(st)
+        self.ser.write(st.encode("ascii"))
 
 def main(args=None):
     rclpy.init(args=args)
