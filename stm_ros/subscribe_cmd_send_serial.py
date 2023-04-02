@@ -46,7 +46,18 @@ class MinimalSubscriber(Node):
         # send_word[0] = str(x)
         # send_word[1] = str(z)
         # self.get_logger().info("%s" % str(send_word))
-        st = str(x)+','+str(z)+'\n'
+        x = str(x)
+        z = str(z)
+        if(len(x)<2):
+            x = '00'+x
+        elif len(x)<3:
+            x = '0'+x
+        if(len(z)<2):
+            z = '00'+z
+        elif len(z)<3:
+            z = '0'+z
+        st = x+','+z+'\n'
+        
         print(st)
         self.ser.write(st.encode("ascii"))
 
