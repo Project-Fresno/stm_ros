@@ -28,7 +28,7 @@ class MinimalSubscriber(Node):
 
         self.ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
         time.sleep(2)
-
+        self.odom_publisher = self.create_publisher(Odometry,'/odom',10)
         self.subscription = self.create_subscription(
             Twist,
             'cmd_vel',
@@ -60,12 +60,41 @@ class MinimalSubscriber(Node):
         
         print(st)
         self.ser.write(st.encode("ascii"))
+    def publish_odometry(self):
+        while True:
+            line = self.ser.readline()
+            # print(line)
+                # Converting Byte Strings into unicode strings
+                # string_received = line.replace('0x8d','')
+            try:
+                string_received = line.decode()
+                # Converting Unicode String into integer
+                # print(string_received)
+                words = string_received.split(",")
+                # print(words)
+                words[0] = words[0].replace('{','')
+                words[0] = words[0].replace("\x00\x00\x00",'')
+                words[0] = words[0].replace("\x00",'')
+                words[1] = words[1].replace("\n", '')
+                print(words)        
+                velocity_x = (float(words[0]) + float(words[1]))*0.0216
+                angular_z = (float(words[0]) - float(words[1]))*0.0719
+            except:
+                pass
+            print(velocity_x,angular_z)
+            msg = Odometry()
+            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.twist.twist.linear.x = velocity_x
+            msg.twist.twist.angular.z = angular_z
+            self.odom_publisher.publish(msg)
+
 
 def main(args=None):
     rclpy.init(args=args)
 
 
     minimal_subscriber = MinimalSubscriber()
+    minimal_subscriber.publish_odometry()
     rclpy.spin(minimal_subscriber)
 
     # Destroy the node explicitly
