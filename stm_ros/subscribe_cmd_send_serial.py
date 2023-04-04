@@ -77,11 +77,11 @@ class MinimalSubscriber(Node):
             # Converting Unicode String into integer
             # print(string_received)
         words = string_received.split(",")
-                # print(words)
+        print(words)
         words[0] = words[0].replace('{','')
         words[0] = words[0].replace("\x00\x00\x00",'')
         words[0] = words[0].replace("\x00",'')
-        words[1] = words[1].replace("\n", '')
+        # words[1] = words[1].replace("\n", '')
         print(words)        
         velocity_x = (float(words[0]) + float(words[1]))*0.0216
         angular_z = (float(words[0]) - float(words[1]))*0.0719
