@@ -72,7 +72,7 @@ class MinimalSubscriber(Node):
             # print(line)
                 # Converting Byte Strings into unicode strings
                 # string_received = line.replace('0x8d','')
-        try:
+        # try:
             string_received = line.decode()
             # Converting Unicode String into integer
             # print(string_received)
@@ -85,8 +85,8 @@ class MinimalSubscriber(Node):
             print(words)        
             velocity_x = (float(words[0]) + float(words[1]))*0.0216
             angular_z = (float(words[0]) - float(words[1]))*0.0719
-        except:
-            pass
+        # except:
+            # pass
         print(velocity_x,angular_z)
         msg = Odometry()
         msg.header.stamp = self.get_clock().now().to_msg()
