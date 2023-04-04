@@ -73,18 +73,18 @@ class MinimalSubscriber(Node):
                 # Converting Byte Strings into unicode strings
                 # string_received = line.replace('0x8d','')
         # try:
-            string_received = line.decode()
+        string_received = line.decode()
             # Converting Unicode String into integer
             # print(string_received)
-            words = string_received.split(",")
+        words = string_received.split(",")
                 # print(words)
-            words[0] = words[0].replace('{','')
-            words[0] = words[0].replace("\x00\x00\x00",'')
-            words[0] = words[0].replace("\x00",'')
-            words[1] = words[1].replace("\n", '')
-            print(words)        
-            velocity_x = (float(words[0]) + float(words[1]))*0.0216
-            angular_z = (float(words[0]) - float(words[1]))*0.0719
+        words[0] = words[0].replace('{','')
+        words[0] = words[0].replace("\x00\x00\x00",'')
+        words[0] = words[0].replace("\x00",'')
+        words[1] = words[1].replace("\n", '')
+        print(words)        
+        velocity_x = (float(words[0]) + float(words[1]))*0.0216
+        angular_z = (float(words[0]) - float(words[1]))*0.0719
         # except:
             # pass
         print(velocity_x,angular_z)
