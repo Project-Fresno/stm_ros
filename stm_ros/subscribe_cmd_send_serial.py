@@ -33,12 +33,19 @@ class MinimalSubscriber(Node):
             Twist,
             'cmd_vel',
             self.listener_callback,
-            10)
-        self.subscription  # prevent unused variable warning
+            10)  # prevent unused variable warning
+        # self.publish_odometry()
+        self.timer = self.create_timer(
+            0.01,        # publishing every 0.1 second
+            self.timer_callback
+        )
+
+
 
     def listener_callback(self, msg):
         # self.get_logger().info('I heard: "%s"' % msg.data)
         # send_word = ["0","0"]
+        print(1)
         msg.linear.x = 100*msg.linear.x
         msg.angular.z = 100*msg.angular.z
         x = int(msg.linear.x)
@@ -56,37 +63,36 @@ class MinimalSubscriber(Node):
             z = '00'+z
         elif len(z)<3:
             z = '0'+z
-        st = x+','+z+'\n'
-        
+        st = x+','+z+'\n'        
         print(st)
         self.ser.write(st.encode("ascii"))
-    def publish_odometry(self):
-        while True:
-            line = self.ser.readline()
+    def timer_callback(self):
+        # while True:
+        line = self.ser.readline()
             # print(line)
                 # Converting Byte Strings into unicode strings
                 # string_received = line.replace('0x8d','')
-            try:
-                string_received = line.decode()
-                # Converting Unicode String into integer
-                # print(string_received)
-                words = string_received.split(",")
+        try:
+            string_received = line.decode()
+            # Converting Unicode String into integer
+            # print(string_received)
+            words = string_received.split(",")
                 # print(words)
-                words[0] = words[0].replace('{','')
-                words[0] = words[0].replace("\x00\x00\x00",'')
-                words[0] = words[0].replace("\x00",'')
-                words[1] = words[1].replace("\n", '')
-                print(words)        
-                velocity_x = (float(words[0]) + float(words[1]))*0.0216
-                angular_z = (float(words[0]) - float(words[1]))*0.0719
-            except:
-                pass
-            print(velocity_x,angular_z)
-            msg = Odometry()
-            msg.header.stamp = self.get_clock().now().to_msg()
-            msg.twist.twist.linear.x = velocity_x
-            msg.twist.twist.angular.z = angular_z
-            self.odom_publisher.publish(msg)
+            words[0] = words[0].replace('{','')
+            words[0] = words[0].replace("\x00\x00\x00",'')
+            words[0] = words[0].replace("\x00",'')
+            words[1] = words[1].replace("\n", '')
+            print(words)        
+            velocity_x = (float(words[0]) + float(words[1]))*0.0216
+            angular_z = (float(words[0]) - float(words[1]))*0.0719
+        except:
+            pass
+        print(velocity_x,angular_z)
+        msg = Odometry()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.twist.twist.linear.x = velocity_x
+        msg.twist.twist.angular.z = angular_z
+        self.odom_publisher.publish(msg)
 
 
 def main(args=None):
@@ -94,7 +100,7 @@ def main(args=None):
 
 
     minimal_subscriber = MinimalSubscriber()
-    minimal_subscriber.publish_odometry()
+    # minimal_subscriber.publish_odometry()
     rclpy.spin(minimal_subscriber)
 
     # Destroy the node explicitly
