@@ -81,7 +81,8 @@ class MinimalSubscriber(Node):
         words[0] = words[0].replace('{','')
         words[0] = words[0].replace("\x00\x00\x00",'')
         words[0] = words[0].replace("\x00",'')
-        # words[1] = words[1].replace("\n", '')
+        if(len(words)==2):
+            words[1] = words[1].replace("\n", '')
         print(words)        
         velocity_x = (float(words[0]) + float(words[1]))*0.0216
         angular_z = (float(words[0]) - float(words[1]))*0.0719
