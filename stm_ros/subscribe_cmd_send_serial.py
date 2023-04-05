@@ -79,8 +79,8 @@ class MinimalSubscriber(Node):
         if len(words) == 2:
             words[1] = words[1].replace('\n', '')
         print(words)
-        velocity_x = (float(words[0]) + float(words[1])) * 0.0216
-        angular_z = (float(words[0]) - float(words[1])) * 0.0719
+        velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
+        angular_z = (float(words[0]) - float(words[1])) * 0.0719 * 2
         # except:
         # pass
         print(velocity_x, angular_z)
