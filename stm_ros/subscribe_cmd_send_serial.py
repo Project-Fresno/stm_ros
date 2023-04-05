@@ -22,32 +22,26 @@ import time
 
 
 class MinimalSubscriber(Node):
-
     def __init__(self):
         super().__init__('cmd_vel_sub')
 
         self.ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
         time.sleep(2)
-        self.odom_publisher = self.create_publisher(Odometry,'/odom',10)
+        self.odom_publisher = self.create_publisher(Odometry, '/odom', 10)
         self.subscription = self.create_subscription(
-            Twist,
-            'cmd_vel',
-            self.listener_callback,
-            10)  # prevent unused variable warning
+            Twist, 'cmd_vel', self.listener_callback, 10
+        )  # prevent unused variable warning
         # self.publish_odometry()
         self.timer = self.create_timer(
-            0.01,        # publishing every 0.1 second
-            self.timer_callback
+            0.01, self.timer_callback  # publishing every 0.1 second
         )
-
-
 
     def listener_callback(self, msg):
         # self.get_logger().info('I heard: "%s"' % msg.data)
         # send_word = ["0","0"]
         print(1)
-        msg.linear.x = 100*msg.linear.x
-        msg.angular.z = 100*msg.angular.z
+        msg.linear.x = 100 * msg.linear.x
+        msg.angular.z = 100 * msg.angular.z
         x = int(msg.linear.x)
         z = int(msg.angular.z)
         # send_word[0] = str(x)
@@ -55,40 +49,41 @@ class MinimalSubscriber(Node):
         # self.get_logger().info("%s" % str(send_word))
         x = str(x)
         z = str(z)
-        if(len(x)<2):
-            x = '00'+x
-        elif len(x)<3:
-            x = '0'+x
-        if(len(z)<2):
-            z = '00'+z
-        elif len(z)<3:
-            z = '0'+z
-        st = x+','+z+'\n'        
+        if len(x) < 2:
+            x = '00' + x
+        elif len(x) < 3:
+            x = '0' + x
+        if len(z) < 2:
+            z = '00' + z
+        elif len(z) < 3:
+            z = '0' + z
+        st = x + ',' + z + '\n'
         print(st)
-        self.ser.write(st.encode("ascii"))
+        self.ser.write(st.encode('ascii'))
+
     def timer_callback(self):
         # while True:
         line = self.ser.readline()
-            # print(line)
-                # Converting Byte Strings into unicode strings
-                # string_received = line.replace('0x8d','')
+        # print(line)
+        # Converting Byte Strings into unicode strings
+        # string_received = line.replace('0x8d','')
         # try:
         string_received = line.decode()
-            # Converting Unicode String into integer
-            # print(string_received)
-        words = string_received.split(",")
+        # Converting Unicode String into integer
+        # print(string_received)
+        words = string_received.split(',')
         print(words)
-        words[0] = words[0].replace('{','')
-        words[0] = words[0].replace("\x00\x00\x00",'')
-        words[0] = words[0].replace("\x00",'')
-        if(len(words)==2):
-            words[1] = words[1].replace("\n", '')
-        print(words)        
-        velocity_x = (float(words[0]) + float(words[1]))*0.0216
-        angular_z = (float(words[0]) - float(words[1]))*0.0719
+        words[0] = words[0].replace('{', '')
+        words[0] = words[0].replace('\x00\x00\x00', '')
+        words[0] = words[0].replace('\x00', '')
+        if len(words) == 2:
+            words[1] = words[1].replace('\n', '')
+        print(words)
+        velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
+        angular_z = (float(words[0]) - float(words[1])) * 0.0719 * 2
         # except:
-            # pass
-        print(velocity_x,angular_z)
+        # pass
+        print(velocity_x, angular_z)
         msg = Odometry()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.twist.twist.linear.x = velocity_x
@@ -98,7 +93,6 @@ class MinimalSubscriber(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
 
     minimal_subscriber = MinimalSubscriber()
     # minimal_subscriber.publish_odometry()
