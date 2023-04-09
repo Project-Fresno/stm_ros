@@ -15,7 +15,7 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from std_msgs.msg import String
+# from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 import serial
 import time
@@ -68,27 +68,31 @@ class MinimalSubscriber(Node):
         # Converting Byte Strings into unicode strings
         # string_received = line.replace('0x8d','')
         # try:
-        string_received = line.decode()
+        if (line is not None):
+            string_received = line.decode()
         # Converting Unicode String into integer
         # print(string_received)
-        words = string_received.split(',')
-        print(words)
-        words[0] = words[0].replace('{', '')
-        words[0] = words[0].replace('\x00\x00\x00', '')
-        words[0] = words[0].replace('\x00', '')
-        if len(words) == 2:
-            words[1] = words[1].replace('\n', '')
-        print(words)
-        velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
-        angular_z = (float(words[0]) - float(words[1])) * 0.0719 * 2
+            words = string_received.split(',')
+            print(words)
+            words[0] = words[0].replace('{', '')
+            words[0] = words[0].replace('\x00\x00\x00', '')
+            words[0] = words[0].replace('\x00', '')
+            if len(words) == 2:
+                words[1] = words[1].replace('\n', '')
+            print(words)
+            velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
+            angular_z = (float(words[0]) - float(words[1])) * 0.0585 * 2
         # except:
         # pass
-        print(velocity_x, angular_z)
-        msg = Odometry()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.twist.twist.linear.x = velocity_x
-        msg.twist.twist.angular.z = angular_z
-        self.odom_publisher.publish(msg)
+            print(velocity_x, angular_z)
+
+            msg = Odometry()
+            msg.twist.covariance[0] = 8.9e-4
+            msg.twist.covariance[35] = 7.01e-3
+            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.twist.twist.linear.x = velocity_x
+            msg.twist.twist.angular.z = angular_z
+            self.odom_publisher.publish(msg)
 
 
 def main(args=None):
