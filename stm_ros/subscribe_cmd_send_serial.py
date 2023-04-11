@@ -71,8 +71,7 @@ class MinimalSubscriber(Node):
         # print(line)
         # Converting Byte Strings into unicode strings
         # string_received = line.replace('0x8d','')
-        if self.ser.inWaiting:
-
+        try:
             # if (line is not None):
             string_received = line.decode()
             # Conerting Unicode String into integer
@@ -98,6 +97,8 @@ class MinimalSubscriber(Node):
             msg.twist.twist.linear.x = velocity_x
             msg.twist.twist.angular.z = angular_z
             self.odom_publisher.publish(msg)
+        except:
+            print('null')
 
 
 def main(args=None):
