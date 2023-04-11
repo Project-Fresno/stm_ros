@@ -34,7 +34,7 @@ class MinimalSubscriber(Node):
         )  # prevent unused variable warning
         # self.publish_odometry()
         self.timer = self.create_timer(
-            0.01, self.timer_callback  # publishing every 0.1 second
+            0.001, self.timer_callback  # publishing every 0.1 second
         )
 
     def listener_callback(self, msg):
@@ -71,7 +71,8 @@ class MinimalSubscriber(Node):
         # print(line)
         # Converting Byte Strings into unicode strings
         # string_received = line.replace('0x8d','')
-        if self.ser.in_waiting:
+        if self.ser.inWaiting:
+
             # if (line is not None):
             string_received = line.decode()
             # Conerting Unicode String into integer
