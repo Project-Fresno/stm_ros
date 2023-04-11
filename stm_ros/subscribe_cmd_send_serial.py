@@ -34,7 +34,7 @@ class MinimalSubscriber(Node):
         )  # prevent unused variable warning
         # self.publish_odometry()
         self.timer = self.create_timer(
-            0.0001, self.timer_callback  # publishing every 0.1 second
+            0.001, self.timer_callback  # publishing every 0.1 second
         )
 
     def listener_callback(self, msg):
