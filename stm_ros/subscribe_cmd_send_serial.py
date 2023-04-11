@@ -15,6 +15,7 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
+
 # from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 import serial
@@ -67,11 +68,11 @@ class MinimalSubscriber(Node):
         # print(line)
         # Converting Byte Strings into unicode strings
         # string_received = line.replace('0x8d','')
-        try:
+        if self.ser.in_waiting:
             # if (line is not None):
             string_received = line.decode()
-        # Converting Unicode String into integer
-        # print(string_received)
+            # Converting Unicode String into integer
+            # print(string_received)
             words = string_received.split(',')
             print(words)
             words[0] = words[0].replace('{', '')
@@ -81,9 +82,9 @@ class MinimalSubscriber(Node):
                 words[1] = words[1].replace('\n', '')
             print(words)
             velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
-            angular_z = (float(words[0]) - float(words[1])) * 0.0585 * 2
-        # except:
-        # pass
+            angular_z = (float(words[1]) - float(words[0])) * 0.0585 * 2
+            # except:
+            # pass
             print(velocity_x, angular_z)
 
             msg = Odometry()
@@ -93,8 +94,6 @@ class MinimalSubscriber(Node):
             msg.twist.twist.linear.x = velocity_x
             msg.twist.twist.angular.z = angular_z
             self.odom_publisher.publish(msg)
-        except ValueError:
-            print("null error")
 
 
 def main(args=None):
