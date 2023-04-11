@@ -71,7 +71,7 @@ class MinimalSubscriber(Node):
         if self.ser.in_waiting:
             # if (line is not None):
             string_received = line.decode()
-            # Converting Unicode String into integer
+            # Conerting Unicode String into integer
             # print(string_received)
             words = string_received.split(',')
             print(words)
