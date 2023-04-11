@@ -34,7 +34,7 @@ class MinimalSubscriber(Node):
         )  # prevent unused variable warning
         # self.publish_odometry()
         self.timer = self.create_timer(
-            0.001, self.timer_callback  # publishing every 0.1 second
+            0.0001, self.timer_callback  # publishing every 0.1 second
         )
 
     def listener_callback(self, msg):
@@ -97,7 +97,7 @@ class MinimalSubscriber(Node):
             msg.twist.twist.linear.x = velocity_x
             msg.twist.twist.angular.z = angular_z
             self.odom_publisher.publish(msg)
-        except:
+        except ValueError:
             print('null')
 
 
