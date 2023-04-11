@@ -41,26 +41,29 @@ class MinimalSubscriber(Node):
         # self.get_logger().info('I heard: "%s"' % msg.data)
         # send_word = ["0","0"]
         print(1)
-        msg.linear.x = 100 * msg.linear.x
-        msg.angular.z = 100 * msg.angular.z
-        x = int(msg.linear.x)
-        z = int(msg.angular.z)
-        # send_word[0] = str(x)
-        # send_word[1] = str(z)
-        # self.get_logger().info("%s" % str(send_word))
-        x = str(x)
-        z = str(z)
-        if len(x) < 2:
-            x = '00' + x
-        elif len(x) < 3:
-            x = '0' + x
-        if len(z) < 2:
-            z = '00' + z
-        elif len(z) < 3:
-            z = '0' + z
-        st = x + ',' + z + '\n'
-        print(st)
-        self.ser.write(st.encode('ascii'))
+        try:
+            msg.linear.x = 100 * msg.linear.x
+            msg.angular.z = 100 * msg.angular.z
+            x = int(msg.linear.x)
+            z = int(msg.angular.z)
+            # send_word[0] = str(x)
+            # send_word[1] = str(z)
+            # self.get_logger().info("%s" % str(send_word))
+            x = str(x)
+            z = str(z)
+            if len(x) < 2:
+                x = '00' + x
+            elif len(x) < 3:
+                x = '0' + x
+            if len(z) < 2:
+                z = '00' + z
+            elif len(z) < 3:
+                z = '0' + z
+            st = x + ',' + z + '\n'
+            print(st)
+            self.ser.write(st.encode('ascii'))
+        except ValueError:
+            print('fuck akash')
 
     def timer_callback(self):
         # while True:
