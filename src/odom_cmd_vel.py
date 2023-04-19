@@ -42,7 +42,7 @@ class Serial_pub_sub(Node):
             self.ser.write(st.encode('ascii'))
             print('Vallue sent :' + st)
         except ValueError:
-            print('null errors')
+            print('null errors while sending cmd_vel')
 
     def timer_callback(self):
         self.odom_calc()
@@ -68,7 +68,7 @@ class Serial_pub_sub(Node):
             msg.twist.twist.angular.z = angular_z
             self.odom_publisher.publish(msg)
         except ValueError:
-            print("Null error")
+            print("Null error while reciving odom ")
 
 
 def main(args=None):
