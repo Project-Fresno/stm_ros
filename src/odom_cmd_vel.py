@@ -9,7 +9,8 @@ import serial
 class Serial_pub_sub(Node):
     def __init__(self):
         super().__init__('odom_cmd_vel')
-        self.setup()
+        # self.setup()
+        self.ser = serial.Serial("/dev/ttyACM0", 115200, timeout=0.5)
         self.odom_publisher = self.create_publisher(Odometry, '/odom', 10)
         self.subscription = self.create_subscription(
             Twist, 'cmd_vel', self.cmd_vel_callback, 10
@@ -79,4 +80,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    pass
+    main()
