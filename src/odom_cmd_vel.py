@@ -59,7 +59,7 @@ class Serial_pub_sub(Node):
                 words[1] = words[1].replace('\n', '')
             velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
             angular_z = (float(words[1]) - float(words[0])) * 0.0585 * 2
-            print("value recived"+velocity_x+angular_z)
+            print("value recived", velocity_x, angular_z)
             msg = Odometry()
             msg.twist.covariance[0] = 8.9e-4
             msg.twist.covariance[35] = 7.01e-3
