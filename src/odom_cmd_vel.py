@@ -18,6 +18,7 @@ class Serial_pub_sub(Node):
         self.timer = self.create_timer(
             0.001, self.timer_callback
         )
+        self.f = open("odom_log.csv", "w")
 
     def setup(self):
         self.ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0.5)
@@ -59,6 +60,8 @@ class Serial_pub_sub(Node):
                 words[1] = words[1].replace('\n', '')
             velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
             angular_z = (float(words[1]) - float(words[0])) * 0.0585 * 2
+            if velocity_x > 1000 or angular_z > 1000:
+                raise ValueError("Value spiked")
             print("value recived", velocity_x, angular_z)
             msg = Odometry()
             msg.twist.covariance[0] = 8.9e-4
