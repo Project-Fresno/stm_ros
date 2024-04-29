@@ -8,20 +8,21 @@ import serial
 
 class Serial_pub_sub(Node):
     def __init__(self):
-        super().__init__('odom_cmd_vel')
+        super().__init__("odom_cmd_vel")
         # self.setup()
         self.ser = serial.Serial("/dev/ttyACM0", 115200, timeout=0.5)
-        self.odom_publisher = self.create_publisher(Odometry, '/odom', 10)
+        self.odom_publisher = self.create_publisher(Odometry, "/odom", 10)
         self.subscription = self.create_subscription(
-            Twist, 'cmd_vel', self.cmd_vel_callback, 10
+            Twist, "cmd_vel", self.cmd_vel_callback, 10
         )
-        self.timer = self.create_timer(
-            0.001, self.timer_callback
-        )
-        self.f = open("odom_log.csv", "w")
+        self.timer = self.create_timer(0.001, self.timer_callback)
+        self.odom_log = open("odom_log.csv", "w")
+        self.odom_log.write("linear_x,angular_z\n")
+        self.cmd_vel_log = open("cmd_vel_log.csv", "w")
+        self.cmd_vel_log.write("linear_x,angular_z\n")
 
     def setup(self):
-        self.ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0.5)
+        self.ser = serial.Serial("/dev/ttyACM0", 115200, timeout=0.5)
 
     def cmd_vel_callback(self, msg):
         try:
@@ -32,18 +33,19 @@ class Serial_pub_sub(Node):
             x = str(x)
             z = str(z)
             if len(x) < 2:
-                x = '00' + x
+                x = "00" + x
             elif len(x) < 3:
-                x = '0' + x
+                x = "0" + x
             if len(z) < 2:
-                z = '00' + z
+                z = "00" + z
             elif len(z) < 3:
-                z = '0' + z
-            st = x + ',' + z + '\n'
-            self.ser.write(st.encode('ascii'))
-            print('Vallue sent :' + st)
+                z = "0" + z
+            st = x + "," + z + "\n"
+            self.cmd_vel_log.write(f"{x},{z}\n")
+            self.ser.write(st.encode("ascii"))
+            print("Vallue sent :" + st)
         except ValueError:
-            print('null errors while sending cmd_vel')
+            print("null errors while sending cmd_vel")
 
     def timer_callback(self):
         self.odom_calc()
@@ -52,15 +54,15 @@ class Serial_pub_sub(Node):
         line = self.ser.readline()
         try:
             string_received = line.decode()
-            words = string_received.split(',')
-            words[0] = words[0].replace('{', '')
-            words[0] = words[0].replace('\x00\x00\x00', '')
-            words[0] = words[0].replace('\x00', '')
+            words = string_received.split(",")
+            words[0] = words[0].replace("{", "")
+            words[0] = words[0].replace("\x00\x00\x00", "")
+            words[0] = words[0].replace("\x00", "")
             if len(words) == 2:
-                words[1] = words[1].replace('\n', '')
+                words[1] = words[1].replace("\n", "")
             velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
             angular_z = (float(words[1]) - float(words[0])) * 0.0585 * 2
-            if velocity_x > 1000 or angular_z > 1000:
+            if abs(velocity_x) > 1000 or abs(angular_z) > 1000:
                 raise ValueError("Value spiked")
             print("value recived", velocity_x, angular_z)
             msg = Odometry()
@@ -69,8 +71,9 @@ class Serial_pub_sub(Node):
             msg.header.stamp = self.get_clock().now().to_msg()
             msg.twist.twist.linear.x = velocity_x
             msg.twist.twist.angular.z = angular_z
+            self.odom_log.write(f"{velocity_x},{angular_z}\n")
             self.odom_publisher.publish(msg)
-        except ValueError:
+        except (ValueError,IndexError):
             print("Null error while reciving odom ")
 
 
