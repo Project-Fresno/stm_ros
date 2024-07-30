@@ -4,7 +4,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 import serial
-
+import math
 
 class Serial_pub_sub(Node):
     def __init__(self):
@@ -20,7 +20,10 @@ class Serial_pub_sub(Node):
         self.odom_log.write("linear_x,angular_z\n")
         self.cmd_vel_log = open("cmd_vel_log.csv", "w")
         self.cmd_vel_log.write("linear_x,angular_z\n")
-
+        self.pre_t = Twist()
+        self.x = 0
+        self.y = 0
+        self.t = 0
     def setup(self):
         self.ser = serial.Serial("/dev/ttyACM0", 115200, timeout=0.5)
 
@@ -48,7 +51,12 @@ class Serial_pub_sub(Node):
             print("null errors while sending cmd_vel")
 
     def timer_callback(self):
+        
         self.odom_calc()
+        self.t+= self.pre_t.angular.z * 0.001
+        self.x+= self.pre_t.linear.x* 0.001*math.cos(self.t)
+        self.y+= self.pre_t.linear.y*0.001*math.sin(self.t)
+        print(self.t,self.x,self.y) 
 
     def odom_calc(self):
         line = self.ser.readline()
@@ -60,11 +68,11 @@ class Serial_pub_sub(Node):
             words[0] = words[0].replace("\x00", "")
             if len(words) == 2:
                 words[1] = words[1].replace("\n", "")
-            velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
-            angular_z = (float(words[1]) - float(words[0])) * 0.0585 * 2
+            velocity_x = (float(words[0]) + float(words[1])) * 0.013 * 2
+            angular_z = (float(words[1]) - float(words[0])) * 0.058 * 2
             if abs(velocity_x) > 1000 or abs(angular_z) > 1000:
                 raise ValueError("Value spiked")
-            print("value recived", velocity_x, angular_z)
+            # print("value recived", velocity_x, angular_z)
             msg = Odometry()
             msg.twist.covariance[0] = 8.9e-4
             msg.twist.covariance[35] = 7.01e-3
@@ -72,6 +80,7 @@ class Serial_pub_sub(Node):
             msg.twist.twist.linear.x = velocity_x
             msg.twist.twist.angular.z = angular_z
             self.odom_log.write(f"{velocity_x},{angular_z}\n")
+            self.pre_t = msg.twist.twist
             self.odom_publisher.publish(msg)
         except (ValueError,IndexError):
             print("Null error while reciving odom ")
