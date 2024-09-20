@@ -16,10 +16,10 @@ class Serial_pub_sub(Node):
             Twist, "cmd_vel", self.cmd_vel_callback, 10
         )
         self.timer = self.create_timer(0.001, self.timer_callback)
-        self.odom_log = open("odom_log.csv", "w")
-        self.odom_log.write("linear_x,angular_z\n")
-        self.cmd_vel_log = open("cmd_vel_log.csv", "w")
-        self.cmd_vel_log.write("linear_x,angular_z\n")
+        #self.odom_log = open("odom_log.csv", "w")
+        #self.odom_log.write("linear_x,angular_z\n")
+        #self.cmd_vel_log = open("cmd_vel_log.csv", "w")
+        #self.cmd_vel_log.write("linear_x,angular_z\n")
         self.pre_t = Twist()
         self.x = 0
         self.y = 0
@@ -44,7 +44,7 @@ class Serial_pub_sub(Node):
             elif len(z) < 3:
                 z = "0" + z
             st = x + "," + z + "\n"
-            self.cmd_vel_log.write(f"{x},{z}\n")
+            # self.cmd_vel_log.write(f"{x},{z}\n")
             self.ser.write(st.encode("ascii"))
             print("Vallue sent :" + st)
         except ValueError:
@@ -79,7 +79,7 @@ class Serial_pub_sub(Node):
             msg.header.stamp = self.get_clock().now().to_msg()
             msg.twist.twist.linear.x = velocity_x
             msg.twist.twist.angular.z = angular_z
-            self.odom_log.write(f"{velocity_x},{angular_z}\n")
+            # self.odom_log.write(f"{velocity_x},{angular_z}\n")
             self.pre_t = msg.twist.twist
             self.odom_publisher.publish(msg)
         except (ValueError,IndexError):
