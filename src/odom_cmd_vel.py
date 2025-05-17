@@ -4,6 +4,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 import serial
+import math
 
 
 class Serial_pub_sub(Node):
@@ -16,10 +17,14 @@ class Serial_pub_sub(Node):
             Twist, "cmd_vel", self.cmd_vel_callback, 10
         )
         self.timer = self.create_timer(0.001, self.timer_callback)
-        self.odom_log = open("odom_log.csv", "w")
-        self.odom_log.write("linear_x,angular_z\n")
-        self.cmd_vel_log = open("cmd_vel_log.csv", "w")
-        self.cmd_vel_log.write("linear_x,angular_z\n")
+        # self.odom_log = open("odom_log.csv", "w")
+        # self.odom_log.write("linear_x,angular_z\n")
+        # self.cmd_vel_log = open("cmd_vel_log.csv", "w")
+        # self.cmd_vel_log.write("linear_x,angular_z\n")
+        self.pre_t = Twist()
+        self.x = 0
+        self.y = 0
+        self.t = 0
 
     def setup(self):
         self.ser = serial.Serial("/dev/ttyACM0", 115200, timeout=0.5)
@@ -41,14 +46,19 @@ class Serial_pub_sub(Node):
             elif len(z) < 3:
                 z = "0" + z
             st = x + "," + z + "\n"
-            self.cmd_vel_log.write(f"{x},{z}\n")
+            # self.cmd_vel_log.write(f"{x},{z}\n")
             self.ser.write(st.encode("ascii"))
             print("Value sent :" + st)
         except ValueError:
             print("null errors while sending cmd_vel")
 
     def timer_callback(self):
+
         self.odom_calc()
+        self.t += self.pre_t.angular.z * 0.001
+        self.x += self.pre_t.linear.x * 0.001 * math.cos(self.t)
+        self.y += self.pre_t.linear.y * 0.001 * math.sin(self.t)
+        print(self.t, self.x, self.y)
 
     def odom_calc(self):
         line = self.ser.readline()
@@ -77,7 +87,8 @@ class Serial_pub_sub(Node):
             msg.header.stamp = self.get_clock().now().to_msg()
             msg.twist.twist.linear.x = velocity_x
             msg.twist.twist.angular.z = angular_z
-            self.odom_log.write(f"{velocity_x},{angular_z}\n")
+            # self.odom_log.write(f"{velocity_x},{angular_z}\n")
+            self.pre_t = msg.twist.twist
             self.odom_publisher.publish(msg)
         except (ValueError, IndexError):
             print("Null error while reciving odom ")
