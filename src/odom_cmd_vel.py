@@ -43,7 +43,7 @@ class Serial_pub_sub(Node):
             st = x + "," + z + "\n"
             self.cmd_vel_log.write(f"{x},{z}\n")
             self.ser.write(st.encode("ascii"))
-            print("Vallue sent :" + st)
+            print("Value sent :" + st)
         except ValueError:
             print("null errors while sending cmd_vel")
 
@@ -60,11 +60,17 @@ class Serial_pub_sub(Node):
             words[0] = words[0].replace("\x00", "")
             if len(words) == 2:
                 words[1] = words[1].replace("\n", "")
-            velocity_x = (float(words[0]) + float(words[1])) * 0.0216 * 2
-            angular_z = (float(words[1]) - float(words[0])) * 0.0585 * 2
+
+            # constant tuned manually to match
+            velocity_x = (float(words[0]) + float(words[1])) * 0.0449  # 0.03283
+            angular_z = (float(words[1]) - float(words[0])) * 0.11322
+
             if abs(velocity_x) > 1000 or abs(angular_z) > 1000:
                 raise ValueError("Value spiked")
+
             print("value recived", velocity_x, angular_z)
+            # print(f"raw: {words[0]}, {words[1]}")
+
             msg = Odometry()
             msg.twist.covariance[0] = 8.9e-4
             msg.twist.covariance[35] = 7.01e-3
@@ -73,7 +79,7 @@ class Serial_pub_sub(Node):
             msg.twist.twist.angular.z = angular_z
             self.odom_log.write(f"{velocity_x},{angular_z}\n")
             self.odom_publisher.publish(msg)
-        except (ValueError,IndexError):
+        except (ValueError, IndexError):
             print("Null error while reciving odom ")
 
 
